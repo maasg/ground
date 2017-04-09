@@ -6,7 +6,7 @@ import edu.berkeley.ground.exceptions.GroundItemNotFoundException;
 import edu.berkeley.ground.exceptions.GroundException;
 import edu.berkeley.ground.model.versions.Item;
 
-public interface ItemFactory<T extends Item<?>> {
+public interface ItemFactory<T extends Item> {
 
   /**
    * Retrieves an item from the database

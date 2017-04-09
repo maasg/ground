@@ -21,7 +21,7 @@ import edu.berkeley.ground.model.versions.Item;
 
 import java.util.Map;
 
-public class Edge extends Item<EdgeVersion> {
+public class Edge extends Item {
   // the name of this Edge
   private final String name;
 

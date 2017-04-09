@@ -21,7 +21,7 @@ import edu.berkeley.ground.model.versions.Item;
 
 import java.util.Map;
 
-public class Graph extends Item<GraphVersion> {
+public class Graph extends Item {
   // the name of this Graph
   private final String name;
 

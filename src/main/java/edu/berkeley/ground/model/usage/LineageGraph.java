@@ -22,7 +22,7 @@ import edu.berkeley.ground.model.versions.Item;
 
 import java.util.Map;
 
-public class LineageGraph extends Item<LineageGraphVersion> {
+public class LineageGraph extends Item {
   // the name of this graph
   private final String name;
 

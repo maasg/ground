@@ -21,7 +21,7 @@ import edu.berkeley.ground.model.versions.Item;
 
 import java.util.Map;
 
-public class Node extends Item<NodeVersion> {
+public class Node extends Item {
   // the name of this Node
   private final String name;
 

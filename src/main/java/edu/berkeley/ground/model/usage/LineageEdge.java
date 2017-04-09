@@ -22,7 +22,7 @@ import edu.berkeley.ground.model.versions.Item;
 
 import java.util.Map;
 
-public class LineageEdge extends Item<LineageEdgeVersion> {
+public class LineageEdge extends Item {
   // the name of this LineageEdge
   private final String name;
 

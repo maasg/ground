@@ -21,7 +21,7 @@ import edu.berkeley.ground.model.versions.Item;
 
 import java.util.Map;
 
-public class Structure extends Item<StructureVersion> {
+public class Structure extends Item {
   // the name of this Structure
   private final String name;
 

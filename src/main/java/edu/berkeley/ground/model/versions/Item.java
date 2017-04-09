@@ -19,8 +19,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.berkeley.ground.model.models.Tag;
 
 import java.util.Map;
-//GM! Generic type information is not used here
-public class Item<T extends Version> {
+
+public class Item {
 
   private final long id;
 
