@@ -21,12 +21,15 @@ import edu.berkeley.ground.model.models.Tag;
 import java.util.List;
 import java.util.Map;
 
-public abstract class GraphFactory {
+public abstract class GraphFactory implements ItemFactory<Graph> {
+
+  public Class<Graph> getType() {
+    return Graph.class;
+  }
+
   public abstract Graph create(String name,
                                String sourceKey,
                                Map<String, Tag> tags) throws GroundException;
-
-  public abstract Graph retrieveFromDatabase(String sourceKey) throws GroundException;
 
   public abstract void update(long itemId, long childId, List<Long> parentIds)
       throws GroundException;

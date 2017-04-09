@@ -70,17 +70,8 @@ public class CassandraGraphFactory extends GraphFactory {
   @Override
   public Graph create(String name, String sourceKey, Map<String, Tag> tags) throws GroundException {
     Graph graph = null;
-    try {
-      graph = this.retrieveFromDatabase(sourceKey);
-    } catch (GroundException e) {
-      if (!e.getMessage().contains("No Graph found")) {
-        throw e;
-      }
-    }
 
-    if (graph != null) {
-      throw new GroundException("Graph with source_key " + sourceKey + " already exists.");
-    }
+    verifyItemNotExists(sourceKey);
 
     long uniqueId = this.idGenerator.generateItemId();
 
