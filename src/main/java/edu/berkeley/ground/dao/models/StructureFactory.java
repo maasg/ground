@@ -21,13 +21,17 @@ import edu.berkeley.ground.model.models.Tag;
 import java.util.List;
 import java.util.Map;
 
-public abstract class StructureFactory {
+public abstract class StructureFactory implements ItemFactory<Structure> {
+
+  public Class<Structure> getType() {
+    return Structure.class;
+  }
+
   public abstract Structure create(String name,
                                    String sourceKey,
                                    Map<String, Tag> tags)
       throws GroundException;
 
-  public abstract Structure retrieveFromDatabase(String sourceKey) throws GroundException;
 
   public abstract void update(long itemId, long childId, List<Long> parentIds)
       throws GroundException;
