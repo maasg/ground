@@ -20,7 +20,6 @@ import edu.berkeley.ground.db.CassandraClient;
 import edu.berkeley.ground.db.CassandraResults;
 import edu.berkeley.ground.db.DbClient;
 import edu.berkeley.ground.db.DbDataContainer;
-import edu.berkeley.ground.exceptions.GroundElementNotFoundException;
 import edu.berkeley.ground.exceptions.GroundException;
 import edu.berkeley.ground.model.models.Node;
 import edu.berkeley.ground.model.models.Tag;
@@ -33,6 +32,8 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static edu.berkeley.ground.dao.models.cassandra.ElementOps.verifyNotEmpty;
 
 
 public class CassandraNodeFactory extends NodeFactory {
@@ -124,9 +125,7 @@ public class CassandraNodeFactory extends NodeFactory {
     predicates.add(new DbDataContainer("source_key", GroundType.STRING, sourceKey));
 
     CassandraResults resultSet = dbClient.equalitySelect("node", DbClient.SELECT_STAR, predicates);
-    if (resultSet.isEmpty()) {
-      throw new GroundElementNotFoundException(Node.class, "source_key", sourceKey);
-    }
+    verifyNotEmpty(resultSet, Node.class, "source_key", sourceKey);
 
     long id = resultSet.getLong("item_id");
     String name = resultSet.getString("name");

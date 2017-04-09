@@ -29,6 +29,8 @@ import edu.berkeley.ground.model.versions.GroundType;
 import edu.berkeley.ground.model.versions.VersionHistoryDag;
 import edu.berkeley.ground.util.IdGenerator;
 
+import static edu.berkeley.ground.dao.models.cassandra.ElementOps.verifyNotEmpty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -136,9 +138,7 @@ public class CassandraEdgeFactory extends EdgeFactory {
     predicates.add(new DbDataContainer(fieldName, valueType, value));
 
     CassandraResults resultSet = this.dbClient.equalitySelect("edge", DbClient.SELECT_STAR, predicates);
-    if (resultSet.isEmpty()) {
-      throw new GroundElementNotFoundException(Edge.class, fieldName, value);
-    }
+    verifyNotEmpty(resultSet, Edge.class, fieldName, value);
 
     long id = resultSet.getLong("item_id");
     long fromNodeId = resultSet.getLong("from_node_id");
