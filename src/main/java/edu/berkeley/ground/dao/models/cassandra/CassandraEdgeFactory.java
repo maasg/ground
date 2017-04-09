@@ -29,7 +29,7 @@ import edu.berkeley.ground.model.versions.GroundType;
 import edu.berkeley.ground.model.versions.VersionHistoryDag;
 import edu.berkeley.ground.util.IdGenerator;
 
-import static edu.berkeley.ground.dao.models.cassandra.ElementOps.verifyNotEmpty;
+import static edu.berkeley.ground.dao.models.cassandra.ItemOps.verifyNotEmpty;
 
 import java.util.ArrayList;
 import java.util.List;

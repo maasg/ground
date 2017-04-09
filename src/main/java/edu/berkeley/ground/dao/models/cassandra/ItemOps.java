@@ -5,8 +5,8 @@ import edu.berkeley.ground.exceptions.GroundItemNotFoundException;
 import edu.berkeley.ground.model.models.Edge;
 import edu.berkeley.ground.model.versions.Item;
 
-public class ElementOps {
-  private ElementOps() {
+public class ItemOps {
+  private ItemOps() {
     // Noop private constructor
   }
 
