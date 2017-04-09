@@ -20,8 +20,7 @@ import edu.berkeley.ground.db.CassandraClient;
 import edu.berkeley.ground.db.CassandraResults;
 import edu.berkeley.ground.db.DbClient;
 import edu.berkeley.ground.db.DbDataContainer;
-import edu.berkeley.ground.exceptions.EmptyResultException;
-import edu.berkeley.ground.exceptions.GroundElementNotFoundException;
+import edu.berkeley.ground.exceptions.GroundItemNotFoundException;
 import edu.berkeley.ground.exceptions.GroundException;
 import edu.berkeley.ground.model.models.Tag;
 import edu.berkeley.ground.model.usage.LineageGraph;
@@ -113,7 +112,7 @@ public class CassandraLineageGraphFactory extends LineageGraphFactory {
 
     CassandraResults resultSet = dbClient.equalitySelect("lineage_graph", DbClient.SELECT_STAR, predicates);
     if (resultSet.isEmpty()) {
-      throw new GroundElementNotFoundException(LineageGraph.class, "source_key", sourceKey);
+      throw new GroundItemNotFoundException(LineageGraph.class, "source_key", sourceKey);
     }
 
     long id = resultSet.getLong("item_id");

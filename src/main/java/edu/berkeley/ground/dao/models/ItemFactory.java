@@ -2,7 +2,7 @@ package edu.berkeley.ground.dao.models;
 
 
 import edu.berkeley.ground.exceptions.GroundItemAlreadyExistsException;
-import edu.berkeley.ground.exceptions.GroundElementNotFoundException;
+import edu.berkeley.ground.exceptions.GroundItemNotFoundException;
 import edu.berkeley.ground.exceptions.GroundException;
 import edu.berkeley.ground.model.versions.Item;
 
@@ -28,7 +28,7 @@ public interface ItemFactory<T extends Item<?>> {
     try {
       this.retrieveFromDatabase(sourceKey);
       return true;
-    } catch (GroundElementNotFoundException elementNotFound) {
+    } catch (GroundItemNotFoundException elementNotFound) {
       return false;
     }
   }
