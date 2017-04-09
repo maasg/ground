@@ -21,15 +21,17 @@ import edu.berkeley.ground.model.models.Tag;
 import java.util.List;
 import java.util.Map;
 
-public abstract class EdgeFactory {
+public abstract class EdgeFactory implements ItemFactory<Edge> {
+
+  public Class<Edge> getType() {
+    return Edge.class;
+  }
 
   public abstract Edge create(String name,
                               String sourceKey,
                               long fromNodeId,
                               long toNodeId,
                               Map<String, Tag> tags) throws GroundException;
-
-  public abstract Edge retrieveFromDatabase(String sourceKey) throws GroundException;
 
   public abstract Edge retrieveFromDatabase(long id) throws GroundException;
 

@@ -90,10 +90,7 @@ public class CassandraEdgeFactory extends EdgeFactory {
                      long toNodeId,
                      Map<String, Tag> tags) throws GroundException {
 
-
-    if (edgeExists(sourceKey)) {
-      throw new GroundElementAlreadyExistsException(Edge.class, sourceKey);
-    }
+    verifyItemNotExists(sourceKey);
 
     long uniqueId = this.idGenerator.generateItemId();
 
@@ -110,15 +107,6 @@ public class CassandraEdgeFactory extends EdgeFactory {
 
     LOGGER.info("Created edge " + name + ".");
     return EdgeFactory.construct(uniqueId, name, sourceKey, fromNodeId, toNodeId, tags);
-  }
-
-  private boolean edgeExists(String sourceKey) throws GroundException {
-    try {
-      this.retrieveByPredicate("source_key", sourceKey, GroundType.STRING);
-      return true;
-    } catch (GroundElementNotFoundException elementNotFound) {
-      return false;
-    }
   }
 
   @Override
