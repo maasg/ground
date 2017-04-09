@@ -21,7 +21,7 @@ import edu.berkeley.ground.model.models.Tag;
 import java.util.List;
 import java.util.Map;
 
-public abstract class GraphFactory implements ItemFactory<Graph> {
+public abstract class GraphFactory implements BaseItemFactory<Graph> {
 
   public Class<Graph> getType() {
     return Graph.class;

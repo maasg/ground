@@ -21,7 +21,7 @@ import edu.berkeley.ground.model.models.Tag;
 import java.util.List;
 import java.util.Map;
 
-public abstract class StructureFactory implements ItemFactory<Structure> {
+public abstract class StructureFactory implements BaseItemFactory<Structure> {
 
   public Class<Structure> getType() {
     return Structure.class;

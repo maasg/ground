@@ -21,7 +21,7 @@ import edu.berkeley.ground.model.models.Tag;
 import java.util.List;
 import java.util.Map;
 
-public abstract class EdgeFactory implements ItemFactory<Edge> {
+public abstract class EdgeFactory implements BaseItemFactory<Edge> {
 
   public Class<Edge> getType() {
     return Edge.class;
