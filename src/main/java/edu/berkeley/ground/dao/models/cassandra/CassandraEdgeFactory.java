@@ -21,8 +21,7 @@ import edu.berkeley.ground.db.CassandraClient;
 import edu.berkeley.ground.db.CassandraResults;
 import edu.berkeley.ground.db.DbClient;
 import edu.berkeley.ground.db.DbDataContainer;
-import edu.berkeley.ground.exceptions.EmptyResultException;
-import edu.berkeley.ground.exceptions.GroundException;
+import edu.berkeley.ground.exceptions.*;
 import edu.berkeley.ground.model.models.Edge;
 import edu.berkeley.ground.model.models.EdgeVersion;
 import edu.berkeley.ground.model.models.Tag;
@@ -89,17 +88,9 @@ public class CassandraEdgeFactory extends EdgeFactory {
                      long toNodeId,
                      Map<String, Tag> tags) throws GroundException {
 
-    Edge edge = null;
-    try {
-      edge = this.retrieveFromDatabase(sourceKey);
-    } catch (GroundException e) {
-      if (!e.getMessage().contains("No Edge found")) {
-        throw e;
-      }
-    }
 
-    if (edge != null) {
-      throw new GroundException("Edge with source_key " + sourceKey + " already exists.");
+    if (edgeExists(sourceKey)) {
+      throw new GroundElementAlreadyExistsException(Edge.class, sourceKey);
     }
 
     long uniqueId = this.idGenerator.generateItemId();
@@ -119,6 +110,15 @@ public class CassandraEdgeFactory extends EdgeFactory {
     return EdgeFactory.construct(uniqueId, name, sourceKey, fromNodeId, toNodeId, tags);
   }
 
+  private boolean edgeExists(String sourceKey) throws GroundException {
+    try {
+      this.retrieveByPredicate("source_key", sourceKey, GroundType.STRING);
+      return true;
+    } catch (GroundElementNotFoundException elementNotFound) {
+      return false;
+    }
+  }
+
   @Override
   public Edge retrieveFromDatabase(String sourceKey) throws GroundException {
     return this.retrieveByPredicate("source_key", sourceKey, GroundType.STRING);
@@ -135,11 +135,9 @@ public class CassandraEdgeFactory extends EdgeFactory {
     List<DbDataContainer> predicates = new ArrayList<>();
     predicates.add(new DbDataContainer(fieldName, valueType, value));
 
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect("edge", DbClient.SELECT_STAR, predicates);
-    } catch (EmptyResultException e) {
-      throw new GroundException("No Edge found with " + fieldName + " " + value + ".");
+    CassandraResults resultSet = this.dbClient.equalitySelect("edge", DbClient.SELECT_STAR, predicates);
+    if (resultSet.isEmpty()) {
+      throw new GroundElementNotFoundException(Edge.class, fieldName, value);
     }
 
     long id = resultSet.getLong("item_id");

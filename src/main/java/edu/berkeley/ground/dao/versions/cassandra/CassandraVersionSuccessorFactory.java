@@ -51,23 +51,8 @@ public class CassandraVersionSuccessorFactory extends VersionSuccessorFactory {
   public <T extends Version> VersionSuccessor<T> create(long fromId, long toId)
       throws GroundException {
     // check to see if both are valid ids since we don't have foreign key constraints
-    List<DbDataContainer> predicates = new ArrayList<>();
-
-    predicates.add(new DbDataContainer("id", GroundType.LONG, fromId));
-    try {
-      this.dbClient.equalitySelect("version", DbClient.SELECT_STAR, predicates);
-    } catch (EmptyResultException e) {
-      throw new GroundException("Id " + fromId + " is not valid.");
-    }
-
-    predicates.clear();
-    predicates.add(new DbDataContainer("id", GroundType.LONG, toId));
-
-    try {
-      this.dbClient.equalitySelect("version", DbClient.SELECT_STAR, predicates);
-    } catch (EmptyResultException e) {
-      throw new GroundException("Id " + toId + " is not valid.");
-    }
+    verifyVersion(fromId);
+    verifyVersion(toId);
 
     List<DbDataContainer> insertions = new ArrayList<>();
 
@@ -80,6 +65,14 @@ public class CassandraVersionSuccessorFactory extends VersionSuccessorFactory {
     this.dbClient.insert("version_successor", insertions);
 
     return VersionSuccessorFactory.construct(dbId, toId, fromId);
+  }
+
+  private void verifyVersion(long id) throws GroundException {
+    List<DbDataContainer> predicate = new ArrayList<>();
+    predicate.add(new DbDataContainer("id", GroundType.LONG, id));
+    if (dbClient.equalitySelect("version", DbClient.SELECT_STAR, predicate).isEmpty()) {
+      throw new GroundException("Id " + id + " is not valid.");
+    }
   }
 
   /**
@@ -96,11 +89,8 @@ public class CassandraVersionSuccessorFactory extends VersionSuccessorFactory {
     List<DbDataContainer> predicates = new ArrayList<>();
     predicates.add(new DbDataContainer("id", GroundType.LONG, dbId));
 
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect("version_successor", DbClient.SELECT_STAR,
-          predicates);
-    } catch (EmptyResultException e) {
+    CassandraResults resultSet = dbClient.equalitySelect("version_successor", DbClient.SELECT_STAR, predicates);
+    if(resultSet.isEmpty()) {
       throw new GroundException("No VersionSuccessor found with id " + dbId + ".");
     }
 
@@ -117,30 +107,27 @@ public class CassandraVersionSuccessorFactory extends VersionSuccessorFactory {
    */
   @Override
   public void deleteFromDestination(long toId, long itemId) throws GroundException {
-    List<DbDataContainer> predicates = new ArrayList<>();
-    predicates.add(new DbDataContainer("to_version_id", GroundType.LONG, toId));
+    List<DbDataContainer> checkVersionSuccPredicate = new ArrayList<>();
+    checkVersionSuccPredicate.add(new DbDataContainer("to_version_id", GroundType.LONG, toId));
 
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect("version_successor", DbClient.SELECT_STAR,
-          predicates);
-    } catch (EmptyResultException e) {
+    CassandraResults resultSet = dbClient.equalitySelect("version_successor", DbClient.SELECT_STAR, checkVersionSuccPredicate);
+    if (resultSet.isEmpty()) {
       throw new GroundException("Version " + toId + " was not part of a DAG.");
     }
 
     do {
       long dbId = resultSet.getLong("id");
 
-      predicates.clear();
-      predicates.add(new DbDataContainer("item_id", GroundType.LONG, itemId));
-      predicates.add(new DbDataContainer("version_successor_id", GroundType.LONG, dbId));
+      List<DbDataContainer> deleteVersionHistDagPredicate = new ArrayList<>();
+      deleteVersionHistDagPredicate.add(new DbDataContainer("item_id", GroundType.LONG, itemId));
+      deleteVersionHistDagPredicate.add(new DbDataContainer("version_successor_id", GroundType.LONG, dbId));
 
-      this.dbClient.delete(predicates, "version_history_dag");
+      this.dbClient.delete(deleteVersionHistDagPredicate, "version_history_dag");
 
-      predicates.clear();
-      predicates.add(new DbDataContainer("id", GroundType.LONG, dbId));
+      List<DbDataContainer> deleteVersionSuccPredicate = new ArrayList<>();
+      checkVersionSuccPredicate.add(new DbDataContainer("id", GroundType.LONG, dbId));
 
-      this.dbClient.delete(predicates, "version_successor");
+      this.dbClient.delete(deleteVersionSuccPredicate, "version_successor");
     } while (resultSet.next());
   }
 }

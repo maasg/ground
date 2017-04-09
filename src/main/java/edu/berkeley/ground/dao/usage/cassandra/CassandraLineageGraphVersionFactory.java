@@ -22,6 +22,7 @@ import edu.berkeley.ground.db.DbClient;
 import edu.berkeley.ground.db.DbDataContainer;
 import edu.berkeley.ground.exceptions.EmptyResultException;
 import edu.berkeley.ground.exceptions.GroundException;
+import edu.berkeley.ground.exceptions.GroundVersionNotFoundException;
 import edu.berkeley.ground.model.models.RichVersion;
 import edu.berkeley.ground.model.models.Tag;
 import edu.berkeley.ground.model.usage.LineageGraphVersion;
@@ -136,31 +137,24 @@ public class CassandraLineageGraphVersionFactory extends LineageGraphVersionFact
     lineageEdgePredicate.add(new DbDataContainer("lineage_graph_version_id", GroundType.LONG,
         id));
 
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect("lineage_graph_version", DbClient.SELECT_STAR,
-          predicates);
-    } catch (EmptyResultException e) {
-      throw new GroundException("No LineageGraphVersion found with id " + id + ".");
+    CassandraResults resultSet = dbClient.equalitySelect("lineage_graph_version", DbClient.SELECT_STAR, predicates);
+
+    if (resultSet.isEmpty()) {
+      throw new GroundVersionNotFoundException(LineageGraphVersion.class, id);
     }
 
     long lineageGraphId = resultSet.getLong("lineage_graph_id");
 
     List<Long> lineageEdgeVersionIds = new ArrayList<>();
-    try {
-      CassandraResults lineageEdgeSet = this.dbClient.equalitySelect("lineage_graph_version_edge",
+    CassandraResults lineageEdgeSet = dbClient.equalitySelect("lineage_graph_version_edge",
           DbClient.SELECT_STAR, lineageEdgePredicate);
-
+    if (!lineageEdgePredicate.isEmpty()) {
       do {
         lineageEdgeVersionIds.add(lineageEdgeSet.getLong("lineage_edge_version_id"));
       } while (lineageEdgeSet.next());
-    } catch (EmptyResultException e) {
-      // do nothing; this means that the lineage_graph is empty
     }
 
-
-    LOGGER.info("Retrieved lineage_graph version " + id + " in lineage_graph " + lineageGraphId
-        + ".");
+    LOGGER.info("Retrieved lineage_graph version " + id + " in lineage_graph " + lineageGraphId + ".");
     return LineageGraphVersionFactory.construct(id, version.getTags(), version
             .getStructureVersionId(), version.getReference(), version.getParameters(),
         lineageGraphId, lineageEdgeVersionIds);

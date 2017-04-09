@@ -93,8 +93,7 @@ public class CassandraClient extends DbClient {
    * @param predicatesAndValues the predicates
    */
   public CassandraResults equalitySelect(
-      String table, List<String> projection, List<DbDataContainer> predicatesAndValues)
-      throws EmptyResultException {
+      String table, List<String> projection, List<DbDataContainer> predicatesAndValues) {
     String items = String.join(", ", projection);
     String select = "select " + items + " from " + table;
 
@@ -119,10 +118,6 @@ public class CassandraClient extends DbClient {
 
     LOGGER.info("Executing query: " + statement.preparedStatement().getQueryString() + ".");
     ResultSet resultSet = this.session.execute(statement);
-
-    if (resultSet == null || resultSet.isExhausted()) {
-      throw new EmptyResultException("No results found for query: " + statement.toString());
-    }
 
     return new CassandraResults(resultSet);
   }

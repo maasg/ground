@@ -22,6 +22,7 @@ import edu.berkeley.ground.db.DbClient;
 import edu.berkeley.ground.db.DbDataContainer;
 import edu.berkeley.ground.exceptions.EmptyResultException;
 import edu.berkeley.ground.exceptions.GroundException;
+import edu.berkeley.ground.exceptions.GroundVersionNotFoundException;
 import edu.berkeley.ground.model.models.RichVersion;
 import edu.berkeley.ground.model.models.Tag;
 import edu.berkeley.ground.model.usage.LineageEdgeVersion;
@@ -126,12 +127,9 @@ public class CassandraLineageEdgeVersionFactory extends LineageEdgeVersionFactor
     List<DbDataContainer> predicates = new ArrayList<>();
     predicates.add(new DbDataContainer("id", GroundType.LONG, id));
 
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect("lineage_edge_version", DbClient.SELECT_STAR,
-          predicates);
-    } catch (EmptyResultException e) {
-      throw new GroundException("No LineageEdgeVersion found with id " + id + ".");
+    CassandraResults resultSet = dbClient.equalitySelect("lineage_edge_version", DbClient.SELECT_STAR, predicates);
+    if (resultSet.isEmpty()) {
+      throw new GroundVersionNotFoundException(LineageEdgeVersion.class, id);
     }
 
     long lineageEdgeId = resultSet.getLong("lineage_edge_id");

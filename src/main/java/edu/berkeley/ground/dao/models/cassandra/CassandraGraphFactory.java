@@ -20,7 +20,7 @@ import edu.berkeley.ground.db.CassandraClient;
 import edu.berkeley.ground.db.CassandraResults;
 import edu.berkeley.ground.db.DbClient;
 import edu.berkeley.ground.db.DbDataContainer;
-import edu.berkeley.ground.exceptions.EmptyResultException;
+import edu.berkeley.ground.exceptions.GroundElementNotFoundException;
 import edu.berkeley.ground.exceptions.GroundException;
 import edu.berkeley.ground.model.models.Graph;
 import edu.berkeley.ground.model.models.Tag;
@@ -109,11 +109,9 @@ public class CassandraGraphFactory extends GraphFactory {
     List<DbDataContainer> predicates = new ArrayList<>();
     predicates.add(new DbDataContainer("source_key", GroundType.STRING, sourceKey));
 
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect("graph", DbClient.SELECT_STAR, predicates);
-    } catch (EmptyResultException e) {
-      throw new GroundException("No Graph found with source_key " + sourceKey + ".");
+    CassandraResults resultSet = dbClient.equalitySelect("graph", DbClient.SELECT_STAR, predicates);
+    if(resultSet.isEmpty()) {
+      throw new GroundElementNotFoundException(Graph.class, "source_key", sourceKey);
     }
 
     long id = resultSet.getLong("item_id");

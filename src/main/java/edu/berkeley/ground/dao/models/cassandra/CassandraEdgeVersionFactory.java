@@ -19,8 +19,8 @@ import edu.berkeley.ground.db.CassandraClient;
 import edu.berkeley.ground.db.CassandraResults;
 import edu.berkeley.ground.db.DbClient;
 import edu.berkeley.ground.db.DbDataContainer;
-import edu.berkeley.ground.exceptions.EmptyResultException;
 import edu.berkeley.ground.exceptions.GroundException;
+import edu.berkeley.ground.exceptions.GroundVersionNotFoundException;
 import edu.berkeley.ground.model.models.EdgeVersion;
 import edu.berkeley.ground.model.models.RichVersion;
 import edu.berkeley.ground.model.models.Tag;
@@ -131,11 +131,9 @@ public class CassandraEdgeVersionFactory extends EdgeVersionFactory {
     List<DbDataContainer> predicates = new ArrayList<>();
     predicates.add(new DbDataContainer("id", GroundType.LONG, id));
 
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect("edge_version", DbClient.SELECT_STAR, predicates);
-    } catch (EmptyResultException e) {
-      throw new GroundException("No EdgeVersion found with id " + id + ".");
+    CassandraResults resultSet = dbClient.equalitySelect("edge_version", DbClient.SELECT_STAR, predicates);
+    if (resultSet.isEmpty()) {
+      throw new GroundVersionNotFoundException(EdgeVersion.class, id);
     }
 
     long edgeId = resultSet.getLong("edge_id");

@@ -60,23 +60,22 @@ public class CassandraVersionHistoryDagFactory extends VersionHistoryDagFactory 
       throws GroundException {
     List<DbDataContainer> predicates = new ArrayList<>();
     predicates.add(new DbDataContainer("item_id", GroundType.LONG, itemId));
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect("version_history_dag", DbClient.SELECT_STAR,
-          predicates);
-    } catch (EmptyResultException e) {
-      // do nothing' this just means that no versions have been added yet.
+    CassandraResults resultSet = this.dbClient.equalitySelect("version_history_dag", DbClient.SELECT_STAR,
+      predicates);
+
+    if (resultSet.isEmpty()) {
       return VersionHistoryDagFactory.construct(itemId, new ArrayList<VersionSuccessor<T>>());
-    }
+    } else {
 
-    List<VersionSuccessor<T>> edges = new ArrayList<>();
+      List<VersionSuccessor<T>> edges = new ArrayList<>();
 
-    do {
-      edges.add(this.versionSuccessorFactory.retrieveFromDatabase(resultSet
+      do {
+        edges.add(this.versionSuccessorFactory.retrieveFromDatabase(resultSet
           .getLong("version_successor_id")));
-    } while (resultSet.next());
+      } while (resultSet.next());
 
-    return VersionHistoryDagFactory.construct(itemId, edges);
+      return VersionHistoryDagFactory.construct(itemId, edges);
+    }
   }
 
   /**

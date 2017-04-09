@@ -20,7 +20,7 @@ import edu.berkeley.ground.db.CassandraClient;
 import edu.berkeley.ground.db.CassandraResults;
 import edu.berkeley.ground.db.DbClient;
 import edu.berkeley.ground.db.DbDataContainer;
-import edu.berkeley.ground.exceptions.EmptyResultException;
+import edu.berkeley.ground.exceptions.GroundElementNotFoundException;
 import edu.berkeley.ground.exceptions.GroundException;
 import edu.berkeley.ground.model.models.Node;
 import edu.berkeley.ground.model.models.Tag;
@@ -123,11 +123,9 @@ public class CassandraNodeFactory extends NodeFactory {
     List<DbDataContainer> predicates = new ArrayList<>();
     predicates.add(new DbDataContainer("source_key", GroundType.STRING, sourceKey));
 
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect("node", DbClient.SELECT_STAR, predicates);
-    } catch (EmptyResultException e) {
-      throw new GroundException("No Node found with source_key " + sourceKey + ".");
+    CassandraResults resultSet = dbClient.equalitySelect("node", DbClient.SELECT_STAR, predicates);
+    if (resultSet.isEmpty()) {
+      throw new GroundElementNotFoundException(Node.class, "source_key", sourceKey);
     }
 
     long id = resultSet.getLong("item_id");

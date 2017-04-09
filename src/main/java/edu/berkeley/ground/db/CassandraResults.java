@@ -17,6 +17,7 @@ package edu.berkeley.ground.db;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 
+import edu.berkeley.ground.exceptions.EmptyResultException;
 import edu.berkeley.ground.exceptions.GroundDbException;
 import edu.berkeley.ground.model.versions.GroundType;
 
@@ -112,4 +113,15 @@ public class CassandraResults {
   public boolean isNull(String field) {
     return this.currentRow.isNull(field);
   }
+
+  /**
+   * Returns whether this Result is empty
+   * @return true is this ResultSet is empty, false otherwise
+   *
+   */
+  public boolean isEmpty() {
+    return  (resultSet == null || resultSet.isExhausted());
+  }
+
+
 }

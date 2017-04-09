@@ -20,8 +20,8 @@ import edu.berkeley.ground.db.CassandraClient;
 import edu.berkeley.ground.db.CassandraResults;
 import edu.berkeley.ground.db.DbClient;
 import edu.berkeley.ground.db.DbDataContainer;
-import edu.berkeley.ground.exceptions.EmptyResultException;
 import edu.berkeley.ground.exceptions.GroundException;
+import edu.berkeley.ground.exceptions.GroundVersionNotFoundException;
 import edu.berkeley.ground.model.models.RichVersion;
 import edu.berkeley.ground.model.models.StructureVersion;
 import edu.berkeley.ground.model.models.Tag;
@@ -132,25 +132,21 @@ public class CassandraRichVersionFactory extends RichVersionFactory {
     List<DbDataContainer> predicates = new ArrayList<>();
     predicates.add(new DbDataContainer("id", GroundType.LONG, id));
 
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect("rich_version", DbClient.SELECT_STAR, predicates);
-    } catch (EmptyResultException e) {
-      throw new GroundException("No RichVersion found with id " + id + ".");
+    CassandraResults resultSet = this.dbClient.equalitySelect("rich_version", DbClient.SELECT_STAR, predicates);
+    if (resultSet.isEmpty()) {
+      throw new GroundVersionNotFoundException(RichVersion.class, id);
     }
 
     List<DbDataContainer> parameterPredicates = new ArrayList<>();
     parameterPredicates.add(new DbDataContainer("rich_version_id", GroundType.LONG, id));
     Map<String, String> referenceParameters = new HashMap<>();
-    try {
-      CassandraResults parameterSet = this.dbClient.equalitySelect("rich_version_external_parameter",
-          DbClient.SELECT_STAR, parameterPredicates);
 
+    CassandraResults parameterSet = this.dbClient.equalitySelect("rich_version_external_parameter",
+        DbClient.SELECT_STAR, parameterPredicates);
+    if (!parameterSet.isEmpty()) {
       do {
         referenceParameters.put(parameterSet.getString("key"), parameterSet.getString("value"));
       } while (parameterSet.next());
-    } catch (EmptyResultException e) {
-      // do nothing; this just means that there are no referenceParameters
     }
 
     Map<String, Tag> tags = this.tagFactory.retrieveFromDatabaseByVersionId(id);

@@ -19,7 +19,6 @@ import edu.berkeley.ground.db.CassandraClient;
 import edu.berkeley.ground.db.CassandraResults;
 import edu.berkeley.ground.db.DbClient;
 import edu.berkeley.ground.db.DbDataContainer;
-import edu.berkeley.ground.exceptions.EmptyResultException;
 import edu.berkeley.ground.exceptions.GroundException;
 import edu.berkeley.ground.model.models.Tag;
 import edu.berkeley.ground.model.versions.GroundType;
@@ -54,26 +53,23 @@ public class CassandraTagFactory extends TagFactory {
 
     Map<String, Tag> result = new HashMap<>();
 
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect(keyPrefix + "_tag", DbClient.SELECT_STAR,
+    CassandraResults resultSet = this.dbClient.equalitySelect(keyPrefix + "_tag", DbClient.SELECT_STAR,
           predicates);
-    } catch (EmptyResultException e) {
-      // this means that there are no tags
+    if (resultSet.isEmpty()) {
+      return result;
+    } else {
+      do {
+        String key = resultSet.getString("key");
+
+        // these methods will return null if the input is null, so there's no need to check
+        GroundType type = GroundType.fromString(resultSet.getString("type"));
+        Object value = this.getValue(type, resultSet);
+
+        result.put(key, new Tag(id, key, value, type));
+      } while (resultSet.next());
+
       return result;
     }
-
-    do {
-      String key = resultSet.getString("key");
-
-      // these methods will return null if the input is null, so there's no need to check
-      GroundType type = GroundType.fromString(resultSet.getString("type"));
-      Object value = this.getValue(type, resultSet);
-
-      result.put(key, new Tag(id, key, value, type));
-    } while (resultSet.next());
-
-    return result;
   }
 
   @Override
@@ -96,19 +92,18 @@ public class CassandraTagFactory extends TagFactory {
     String idColumn = keyPrefix + "_id";
     projections.add(idColumn);
 
-    CassandraResults resultSet;
-    try {
-      resultSet = this.dbClient.equalitySelect(keyPrefix + "_tag", projections, predicates);
-    } catch (EmptyResultException e) {
-      // this means that there are no tags
+    CassandraResults resultSet = this.dbClient.equalitySelect(keyPrefix + "_tag", projections, predicates);
+
+    if (resultSet.isEmpty()) {
+      return result;
+    } else  {
+
+      do {
+        result.add(resultSet.getLong(idColumn));
+      } while (resultSet.next());
+
       return result;
     }
-
-    do {
-      result.add(resultSet.getLong(idColumn));
-    } while (resultSet.next());
-
-    return result;
   }
 
   private Object getValue(GroundType type, CassandraResults resultSet) throws GroundException {
