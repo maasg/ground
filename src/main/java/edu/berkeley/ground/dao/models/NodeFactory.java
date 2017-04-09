@@ -21,16 +21,19 @@ import edu.berkeley.ground.model.models.Tag;
 import java.util.List;
 import java.util.Map;
 
-public abstract class NodeFactory {
+public abstract class NodeFactory implements ItemFactory<Node> {
+
+  public Class<Node> getType() {
+    return Node.class;
+  }
+
   public abstract Node create(String name,
                               String sourceKey,
                               Map<String, Tag> tags)
       throws GroundException;
 
-  public abstract Node retrieveFromDatabase(String sourceKey) throws GroundException;
-
   public abstract void update(long itemId, long childId, List<Long> parentIds)
-      throws GroundException;
+    throws GroundException;
 
   public abstract void truncate(long itemId, int numLevels) throws GroundException;
 

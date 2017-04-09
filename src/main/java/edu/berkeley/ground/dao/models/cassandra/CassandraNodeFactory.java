@@ -69,18 +69,8 @@ public class CassandraNodeFactory extends NodeFactory {
    */
   @Override
   public Node create(String name, String sourceKey, Map<String, Tag> tags) throws GroundException {
-    Node node = null;
-    try {
-      node = this.retrieveFromDatabase(sourceKey);
-    } catch (GroundException e) {
-      if (!e.getMessage().contains("No Node found")) {
-        throw e;
-      }
-    }
 
-    if (node != null) {
-      throw new GroundException("Node with source_key " + sourceKey + " already exists.");
-    }
+    verifyItemNotExists(sourceKey);
 
     long uniqueId = this.idGenerator.generateItemId();
 
